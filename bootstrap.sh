@@ -165,7 +165,7 @@ append_if_missing 'eval "$(mise activate zsh)"'
 # fzf (fuzzy finder keybindings + completion)
 append_if_missing 'source <(fzf --zsh)'
 
-success "~/.zshrc updated"
+success "$HOME/.zshrc updated"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
