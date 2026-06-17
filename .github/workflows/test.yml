@@ -12,7 +12,7 @@ jobs:
     name: Shellcheck
     runs-on: ubuntu-latest  # shellcheck runs anywhere; no need to burn macOS minutes
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install shellcheck
         run: sudo apt-get install -y shellcheck
@@ -38,7 +38,7 @@ jobs:
       HOMEBREW_NO_INSTALL_CLEANUP: "1"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Syntax check
         run: bash -n bootstrap.sh
