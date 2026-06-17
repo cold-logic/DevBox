@@ -1,0 +1,83 @@
+# ── Runtime & Package Managers ────────────────────────────────────────────────
+brew "mise"          # Polyglot runtime manager (node, python, ruby, etc.)
+brew "uv"            # Fast Python package manager / tool runner
+brew "bun"           # JavaScript runtime + package manager
+
+# ── AWS ───────────────────────────────────────────────────────────────────────
+brew "awscli"
+brew "aws-vault"     # Secure AWS credential storage
+
+# ── Git & GitHub ──────────────────────────────────────────────────────────────
+brew "gh"            # GitHub CLI
+brew "git-lfs"       # Large file support
+brew "lazygit"       # TUI git client
+cask "git-credential-manager"
+
+# ── CLI Quality of Life ───────────────────────────────────────────────────────
+brew "bat"           # Better cat
+brew "eza"           # Better ls
+brew "fzf"           # Fuzzy finder
+brew "jq"            # JSON processor
+brew "yq"            # YAML/JSON/TOML processor
+brew "ripgrep"       # Fast grep
+brew "zoxide"        # Smarter cd
+brew "tmux"          # Terminal multiplexer
+brew "tldr"          # Simplified man pages
+brew "tree"          # Directory tree view
+brew "trash"         # Safe rm
+brew "btop"          # Resource monitor
+brew "wget"
+brew "mas"           # Mac App Store CLI
+
+# ── Shell Enhancements ────────────────────────────────────────────────────────
+brew "zsh-autosuggestions"
+brew "zsh-syntax-highlighting"
+
+# ── Python Dev ────────────────────────────────────────────────────────────────
+brew "ruff"          # Linter/formatter
+brew "ty"            # Type checker
+
+# ── Fonts ─────────────────────────────────────────────────────────────────────
+cask "font-jetbrains-mono-nerd-font"
+
+# ── Terminal ──────────────────────────────────────────────────────────────────
+cask "warp"
+cask "ghostty"
+
+# ── Editors / IDEs ────────────────────────────────────────────────────────────
+cask "visual-studio-code"
+cask "zed"
+
+# ── AI Coding Agents ──────────────────────────────────────────────────────────
+cask "claude"
+cask "codex"
+cask "codex-app"
+cask "kiro"
+cask "kiro-cli"
+
+# ── Browser ───────────────────────────────────────────────────────────────────
+cask "arc"
+
+# ── Productivity ──────────────────────────────────────────────────────────────
+cask "raycast"       # App launcher / Alfred replacement
+cask "1password"     # Password manager
+cask "pop-app"       # Pair programming
+
+# ── Communication ─────────────────────────────────────────────────────────────
+cask "slack"
+
+# ── System Utilities ──────────────────────────────────────────────────────────
+cask "appcleaner"
+cask "pearcleaner"   # Deep app uninstaller
+cask "suspicious-package" # Inspect .pkg installers before running
+
+# ── Mac App Store ─────────────────────────────────────────────────────────────
+mas "1Password for Safari", id: 1569813296
+mas "Magnet", id: 441258766          # Window manager
+mas "The Unarchiver", id: 425424353
+mas "Pure Paste", id: 1611378436     # Paste without formatting
+mas "Tailscale", id: 1475387142      # VPN / mesh network
+
+# ── uv Tools ──────────────────────────────────────────────────────────────────
+uv "pre-commit"
+uv "pyright"

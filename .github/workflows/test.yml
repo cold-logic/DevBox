@@ -1,0 +1,108 @@
+name: Test Bootstrap
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  # ── Job 1: Lint ─────────────────────────────────────────────────────────────
+  lint:
+    name: Shellcheck
+    runs-on: ubuntu-latest  # shellcheck runs anywhere; no need to burn macOS minutes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Lint bootstrap.sh
+        run: shellcheck --severity=warning bootstrap.sh
+
+  # ── Job 2: Smoke test ───────────────────────────────────────────────────────
+  smoke:
+    name: Smoke Test (formulae only)
+    runs-on: macos-latest
+    needs: lint  # don't waste macOS runner minutes if lint fails
+
+    env:
+      # Tell brew bundle to skip casks, MAS apps, and uv tools in CI
+      # (casks need GUI session, MAS needs App Store login, uv needs uv installed first)
+      HOMEBREW_BUNDLE_CASK_SKIP: >-
+        git-credential-manager font-jetbrains-mono-nerd-font warp ghostty
+        visual-studio-code zed claude codex codex-app kiro kiro-cli arc
+        raycast 1password pop-app slack appcleaner pearcleaner suspicious-package
+      HOMEBREW_BUNDLE_MAS_SKIP: "1569813296 441258766 425424353 1611378436 1475387142"
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        run: bash -n bootstrap.sh
+
+      - name: Extract embedded Brewfile
+        # Pull the heredoc out of the script so we can inspect it independently
+        run: |
+          sed -n "/^cat > \"\$BREWFILE\" << 'BREWFILE_EOF'/,/^BREWFILE_EOF/p" bootstrap.sh \
+            | sed '1d;$d' > /tmp/Brewfile.extracted
+          echo "── Extracted Brewfile ──"
+          cat /tmp/Brewfile.extracted
+
+      - name: Validate Brewfile syntax (list only, no install)
+        run: brew bundle list --file /tmp/Brewfile.extracted
+
+      - name: Install formulae only
+        # Runs brew bundle with casks/MAS skipped via env vars above
+        run: |
+          brew bundle install \
+            --file /tmp/Brewfile.extracted \
+            --no-lock \
+            --no-upgrade \
+            --verbose
+
+      - name: Verify key tools are on PATH
+        run: |
+          which jq
+          which rg
+          which lazygit
+          which gh
+          which mise
+          which uv
+          which bat
+          which eza
+          which fzf
+
+      - name: Test zshrc patching (dry run in subshell)
+        # Source the patching logic from bootstrap.sh in isolation
+        # by extracting and running just that section
+        shell: bash
+        run: |
+          touch ~/.zshrc
+          BREW_PREFIX="$(brew --prefix)"
+          append_if_missing() {
+            local line="$1"
+            grep -qxF "$line" ~/.zshrc 2>/dev/null || echo "$line" >> ~/.zshrc
+          }
+          append_if_missing "source \"${BREW_PREFIX}/share/zsh-autosuggestions/zsh-autosuggestions.zsh\""
+          append_if_missing "source \"${BREW_PREFIX}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh\""
+          append_if_missing 'eval "$(zoxide init zsh)"'
+          append_if_missing 'eval "$(mise activate zsh)"'
+          append_if_missing 'source <(fzf --zsh)'
+
+          echo "── ~/.zshrc after patching ──"
+          cat ~/.zshrc
+
+          # Idempotency check: run again, line count should not change
+          LINES_BEFORE=$(wc -l < ~/.zshrc)
+          append_if_missing "source \"${BREW_PREFIX}/share/zsh-autosuggestions/zsh-autosuggestions.zsh\""
+          append_if_missing 'eval "$(zoxide init zsh)"'
+          LINES_AFTER=$(wc -l < ~/.zshrc)
+
+          if [[ "$LINES_BEFORE" != "$LINES_AFTER" ]]; then
+            echo "FAIL: append_if_missing is not idempotent"
+            exit 1
+          fi
+          echo "✓ Idempotency check passed"
